@@ -1,23 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from 'react';
+import Gallery from './Components/Gallery';
+import Button from 'react-bootstrap/Button';
 
 function App() {
+  const [memeUrlList, setMemeUrlList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (isLoading) {
+      loadMemes()
+        .then(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [isLoading])
+
+  const loadMemes = async () => {
+    return await fetch('https://api.imgflip.com/get_memes')
+      .then((response) => response.json())
+      .then((data) => {
+        const tempMemeUrlList = data.data.memes.map((meme) => meme.url);
+        setMemeUrlList(tempMemeUrlList);
+      });
+  }
+
+  // Click Get memes button
+  const handleClickGetMemeBtn = () => {
+    setIsLoading(true);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div>
+      <div className="text-center mt-4">
+        <Button
+          onClick={isLoading ? null : handleClickGetMemeBtn}
+          disabled={isLoading}
         >
-          Learn React
-        </a>
-      </header>
+          Get memes
+        </Button>
+      </div>
+      <Gallery imageUrls={memeUrlList} />
     </div>
   );
 }
